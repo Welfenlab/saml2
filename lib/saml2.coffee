@@ -408,6 +408,10 @@ module.exports.ServiceProvider =
       options = set_option_defaults options, identity_provider.shared_options, @shared_options
 
       { id, xml } = create_authn_request @entity_id, @assert_endpoint, identity_provider.sso_login_url, options.force_authn, options.auth_context, options.nameid_format
+      uri = url.parse identity_provider.sso_login_url
+      data = SAMLRequest: new Buffer(xml).toString("base64")
+      cb null, url.format(uri), data, id
+      ###
       zlib.deflateRaw xml, (err, deflated) =>
         return cb err if err?
         uri = url.parse identity_provider.sso_login_url
@@ -415,9 +419,11 @@ module.exports.ServiceProvider =
         if options.sign_get_request
           data = sign_request deflated.toString('base64'), @private_key, options.relay_state
         else
+          console.log "not signed"
           data = SAMLRequest: deflated.toString 'base64'
           data.RelayState = options.relay_state if options.relay_state?
         cb null, url.format(uri), data, id
+        ###
 
     # Returns:
     #   An object containing the parsed response for a redirect assert.
