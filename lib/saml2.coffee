@@ -404,6 +404,21 @@ module.exports.ServiceProvider =
           uri.query.RelayState = options.relay_state if options.relay_state?
         cb null, url.format(uri), id
 
+    create_login_request: (identity_provider, options, cb) ->
+      options = set_option_defaults options, identity_provider.shared_options, @shared_options
+
+      { id, xml } = create_authn_request @entity_id, @assert_endpoint, identity_provider.sso_login_url, options.force_authn, options.auth_context, options.nameid_format
+      zlib.deflateRaw xml, (err, deflated) =>
+        return cb err if err?
+        uri = url.parse identity_provider.sso_login_url
+        data = null
+        if options.sign_get_request
+          data = sign_request deflated.toString('base64'), @private_key, options.relay_state
+        else
+          data = SAMLRequest: deflated.toString 'base64'
+          data.RelayState = options.relay_state if options.relay_state?
+        cb null, url.format(uri), data, id
+
     # Returns:
     #   An object containing the parsed response for a redirect assert.
     #   This type of assert inflates the response before parsing it.
@@ -501,7 +516,7 @@ module.exports.ServiceProvider =
     create_logout_response_url: (identity_provider, options, cb) ->
       identity_provider = { sso_logout_url: identity_provider, options: {} } if _.isString(identity_provider)
       options = set_option_defaults options, identity_provider.shared_options, @shared_options
-      
+
       xml = create_logout_response @entity_id, options.in_response_to, identity_provider.sso_logout_url
       zlib.deflateRaw xml, (err, deflated) =>
         return cb err if err?
@@ -540,4 +555,3 @@ if process.env.NODE_ENV is "test"
   module.exports.get_session_index = get_session_index
   module.exports.parse_assertion_attributes = parse_assertion_attributes
   module.exports.set_option_defaults = set_option_defaults
-

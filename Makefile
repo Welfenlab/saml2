@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 LIBS=$(shell find . -regex "^./lib\/.*\.coffee\$$" | sed s/\.coffee$$/\.js/ | sed s/lib/lib-js/)
 
-.PHONY: test
+.PHONY: 
 
 build: $(LIBS)
 
