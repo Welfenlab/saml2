@@ -74,10 +74,10 @@ create_authn_request = function(issuer, assert_endpoint, destination, force_auth
       '@ProtocolBinding': 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
       '@ForceAuthn': force_authn,
       'saml:Issuer': issuer,
-      NameIDPolicy: {
-        '@Format': nameid_format || 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
-        '@AllowCreate': 'true'
-      },
+//      NameIDPolicy: {
+//        '@Format': nameid_format || 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+//        '@AllowCreate': 'true'
+//      },
       RequestedAuthnContext: context_element
     }
   }).end();
