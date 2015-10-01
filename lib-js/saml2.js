@@ -212,9 +212,9 @@ certificate_to_keyinfo = function(use, certificate) {
   };
 };
 
-check_saml_signature = function(xml, certificate, cb) {
+check_saml_signature = function(xml,xmlAll, certificate, cb) {
   var doc, sig, signature;
-  doc = (new xmldom.DOMParser()).parseFromString(xml);
+  doc = (new xmldom.DOMParser()).parseFromString(xmlAll);
   signature = xmlcrypto.xpath(doc, "/*/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']");
   if (signature.length !== 1) {
     return false;
@@ -226,7 +226,7 @@ check_saml_signature = function(xml, certificate, cb) {
     }
   };
   sig.loadSignature(signature[0].toString());
-  return sig.checkSignature(xml);
+  return sig.checkSignature(xmlAll.toString());
 };
 
 check_status_success = function(dom) {
@@ -474,7 +474,7 @@ parse_authn_response = function(saml_response, sp_private_key, idp_certificates,
   user = {};
   decrypted_assertion = null;
   return async.waterfall([
-    function(cb_wf) {
+    /*function(cb_wf) {
       return decrypt_assertion(saml_response, sp_private_key, function(err, result) {
         var assertion;
         if (err == null) {
@@ -489,7 +489,9 @@ parse_authn_response = function(saml_response, sp_private_key, idp_certificates,
         }
         return cb_wf(null, assertion[0].toString());
       });
-    }, function(result, cb_wf) {
+    }, function(result, cb_wf) {*/
+    function(cb_wf){
+      var result = saml_response.getElementsByTagNameNS(XMLNS.SAML, 'Assertion')[0].toString();
       debug(result);
       decrypted_assertion = (new xmldom.DOMParser()).parseFromString(result);
       if (!_.some(idp_certificates, function(cert) {
@@ -613,7 +615,8 @@ module.exports.ServiceProvider = ServiceProvider = (function() {
 
   ServiceProvider.prototype.post_assert = function(identity_provider, options, cb) {
     options = _.extend(options, {
-      get_request: false
+      get_request: false,
+      allow_unencrypted_assertion: false
     });
     options = set_option_defaults(options, identity_provider.shared_options, this.shared_options);
     return this._assert(identity_provider, options, cb);
