@@ -214,7 +214,7 @@ certificate_to_keyinfo = function(use, certificate) {
 
 check_saml_signature = function(xml,xmlAll, certificate, cb) {
   var doc, sig, signature;
-  doc = (new xmldom.DOMParser()).parseFromString(xmlAll);
+  doc = xmlAll;//(new xmldom.DOMParser()).parseFromString(xmlAll);
   signature = xmlcrypto.xpath(doc, "/*/*[local-name(.)='Signature' and namespace-uri(.)='http://www.w3.org/2000/09/xmldsig#']");
   if (signature.length !== 1) {
     return false;
