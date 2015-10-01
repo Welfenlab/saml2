@@ -495,7 +495,7 @@ parse_authn_response = function(saml_response, sp_private_key, idp_certificates,
       debug(result);
       decrypted_assertion = (new xmldom.DOMParser()).parseFromString(result);
       if (!_.some(idp_certificates, function(cert) {
-        return check_saml_signature(result, cert);
+        return check_saml_signature(result, saml_response, cert);
       })) {
         return cb_wf(new Error("SAML Assertion signature check failed! (checked " + idp_certificates.length + " certificate(s))"));
       }
